@@ -4,37 +4,26 @@ HDBSCAN: Hierarchical Density-Based Spatial Clustering
          of Applications with Noise
 """
 
-import numpy as np
+from warnings import warn
 
+import numpy as np
+from joblib import Memory
+from joblib.parallel import cpu_count
+from scipy.sparse import csgraph, issparse
 from sklearn.base import BaseEstimator, ClusterMixin
 from sklearn.metrics import pairwise_distances
-from scipy.sparse import issparse
-from sklearn.neighbors import KDTree, BallTree
-from joblib import Memory
-from warnings import warn
+from sklearn.neighbors import BallTree, KDTree
 from sklearn.utils import check_array
-from joblib.parallel import cpu_count
 
-from scipy.sparse import csgraph
-
-from ._hdbscan_linkage import (
-    single_linkage,
-    mst_linkage_core,
-    mst_linkage_core_vector,
-    label,
-)
-from ._hdbscan_tree import (
-    condense_tree,
-    compute_stability,
-    get_clusters,
-    outlier_scores,
-)
-from ._hdbscan_reachability import mutual_reachability, sparse_mutual_reachability
-
-from ._hdbscan_boruvka import KDTreeBoruvkaAlgorithm, BallTreeBoruvkaAlgorithm
+from ._hdbscan_boruvka import BallTreeBoruvkaAlgorithm, KDTreeBoruvkaAlgorithm
+from ._hdbscan_linkage import (label, mst_linkage_core,
+                               mst_linkage_core_vector, single_linkage)
+from ._hdbscan_reachability import (mutual_reachability,
+                                    sparse_mutual_reachability)
+from ._hdbscan_tree import (compute_stability, condense_tree, get_clusters,
+                            outlier_scores)
 from .dist_metrics import DistanceMetric
-
-from .plots import CondensedTree, SingleLinkageTree, MinimumSpanningTree
+from .plots import CondensedTree, MinimumSpanningTree, SingleLinkageTree
 from .prediction import PredictionData
 
 KDTREE_VALID_METRICS = ["euclidean", "l2", "minkowski", "p", "manhattan", "cityblock", "l1", "chebyshev", "infinity"]
@@ -71,6 +60,7 @@ def _tree_to_labels(
     match_reference_implementation=False,
     cluster_selection_epsilon=0.0,
     max_cluster_size=0,
+    max_cluster_eps=np.inf
 ):
     """Converts a pretrained tree and cluster size into a
     set of labels and probabilities.
@@ -85,6 +75,7 @@ def _tree_to_labels(
         match_reference_implementation,
         cluster_selection_epsilon,
         max_cluster_size,
+        max_cluster_eps,
     )
 
     return (labels, probabilities, stabilities, condensed_tree, single_linkage_tree)
@@ -528,6 +519,7 @@ def hdbscan(
     cluster_selection_method="eom",
     allow_single_cluster=False,
     match_reference_implementation=False,
+    max_cluster_eps=np.inf,
     **kwargs
 ):
     """Perform HDBSCAN clustering from a vector array or distance matrix.
@@ -890,6 +882,7 @@ def hdbscan(
             match_reference_implementation,
             cluster_selection_epsilon,
             max_cluster_size,
+            max_cluster_eps
         )
         + (result_min_span_tree,)
     )
@@ -1116,12 +1109,14 @@ class HDBSCAN(BaseEstimator, ClusterMixin):
         allow_single_cluster=False,
         prediction_data=False,
         match_reference_implementation=False,
+        max_cluster_eps=np.inf,
         **kwargs
     ):
         self.min_cluster_size = min_cluster_size
         self.min_samples = min_samples
         self.alpha = alpha
         self.max_cluster_size = max_cluster_size
+        self.max_cluster_eps = max_cluster_eps
         self.cluster_selection_epsilon = cluster_selection_epsilon
         self.metric = metric
         self.p = p
