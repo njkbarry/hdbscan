@@ -11,15 +11,16 @@ of different densities unlike DBSCAN.
 """
 print(__doc__)
 
-import numpy as np
+import time
 
-from hdbscan import HDBSCAN
-from sklearn.cluster import DBSCAN
+import numpy as np
 from sklearn import metrics
-from sklearn.datasets.samples_generator import make_blobs
+from sklearn.cluster import DBSCAN
+from sklearn.datasets._samples_generator import make_blobs
 from sklearn.preprocessing import StandardScaler
 
-import time
+from hdbscan import HDBSCAN
+
 
 def make_var_density_blobs(n_samples=750, centers=[[0,0]], cluster_std=[0.5], random_state=0):
     samples_per_blob = n_samples // len(centers)

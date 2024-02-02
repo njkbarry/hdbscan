@@ -65,6 +65,10 @@ def _tree_to_labels(
     """Converts a pretrained tree and cluster size into a
     set of labels and probabilities.
     """
+
+    # print('single linkage tree shape:', single_linkage_tree.shape)
+    # print('single linkage tree:', single_linkage_tree)
+
     condensed_tree = condense_tree(single_linkage_tree, min_cluster_size)
     stability_dict = compute_stability(condensed_tree)
     labels, probabilities, stabilities = get_clusters(

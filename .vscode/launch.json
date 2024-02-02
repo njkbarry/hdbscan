@@ -1,0 +1,39 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python C++ Debugger",
+            "type": "pythoncpp",
+            "request": "launch",
+            "pythonLaunchName": "hbscan_debugging",
+            "cppAttachName": "(gdb) Attach"
+        },
+        {
+            "name": "(gdb) Attach",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "/home/nickb/Documents/Repositories/hdbscan/venv/bin/python",
+            "processId": "",
+            "MIMode": "gdb",
+            // "miDebuggerPath": "/path/to/gdb or remove this attribute for the path to be found automatically",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "hbscan_debugging",
+            "type": "python",
+            "request": "launch",
+            "program": "examples/hbscan_debugging.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }
+    ]
+}

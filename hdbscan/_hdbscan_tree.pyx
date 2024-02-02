@@ -742,12 +742,16 @@ cpdef tuple get_clusters(np.ndarray tree, dict stability,
         max_cluster_size = num_points + 1  # Set to a value that will never be triggered
     cluster_sizes = {child: child_size for child, child_size
                  in zip(cluster_tree['child'], cluster_tree['child_size'])}
-    cluster_eps =  {child: 1 / child_lambda for child, child_lambda
-                 in zip(cluster_tree['child'], cluster_tree['lambda_val'])}
+
     if allow_single_cluster:
         # Compute cluster size for the root node
         cluster_sizes[node_list[-1]] = np.sum(
             cluster_tree[cluster_tree['parent'] == node_list[-1]]['child_size'])
+
+    # print("example of node:")
+    # print('tree', tree)
+    # print('tree[\'parent\']', tree['parent'])
+    # print('tree[\'parent\'].shape', tree['parent'].shape)
 
     if cluster_selection_method == 'eom':
         for node in node_list:
@@ -755,7 +759,21 @@ cpdef tuple get_clusters(np.ndarray tree, dict stability,
             subtree_stability = np.sum([
                 stability[child] for
                 child in cluster_tree['child'][child_selection]])
-            if subtree_stability > stability[node] or cluster_sizes[node] > max_cluster_size or cluster_eps[node] > max_cluster_eps:
+            
+            clusters = set([node])
+            cluster_map = {c: n for n, c in enumerate(sorted(list(clusters)))}
+            reverse_cluster_map = {n: c for c, n in cluster_map.items()}
+
+            labels = do_labelling(tree, clusters, cluster_map,
+                                allow_single_cluster, cluster_selection_epsilon,
+                                match_reference_implementation)
+            # print('node:', node)
+            # print('labels:', labels)
+            min_prob = np.min(np.nonzero(get_probabilities(tree, reverse_cluster_map, labels)))
+
+            # print('subtree_probs:', subtree_probs)
+            
+            if subtree_stability > stability[node] or cluster_sizes[node] > max_cluster_size  or min_prob < max_cluster_eps:
                 is_cluster[node] = False
                 stability[node] = subtree_stability
             else:
