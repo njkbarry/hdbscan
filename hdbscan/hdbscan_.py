@@ -60,7 +60,7 @@ def _tree_to_labels(
     match_reference_implementation=False,
     cluster_selection_epsilon=0.0,
     max_cluster_size=0,
-    max_cluster_eps=np.inf
+    min_prob_limit=np.inf
 ):
     """Converts a pretrained tree and cluster size into a
     set of labels and probabilities.
@@ -79,7 +79,7 @@ def _tree_to_labels(
         match_reference_implementation,
         cluster_selection_epsilon,
         max_cluster_size,
-        max_cluster_eps,
+        min_prob_limit,
     )
 
     return (labels, probabilities, stabilities, condensed_tree, single_linkage_tree)
@@ -523,7 +523,7 @@ def hdbscan(
     cluster_selection_method="eom",
     allow_single_cluster=False,
     match_reference_implementation=False,
-    max_cluster_eps=np.inf,
+    min_prob_limit=np.inf,
     **kwargs
 ):
     """Perform HDBSCAN clustering from a vector array or distance matrix.
@@ -886,7 +886,7 @@ def hdbscan(
             match_reference_implementation,
             cluster_selection_epsilon,
             max_cluster_size,
-            max_cluster_eps
+            min_prob_limit
         )
         + (result_min_span_tree,)
     )
@@ -1113,14 +1113,14 @@ class HDBSCAN(BaseEstimator, ClusterMixin):
         allow_single_cluster=False,
         prediction_data=False,
         match_reference_implementation=False,
-        max_cluster_eps=np.inf,
+        min_prob_limit=np.inf,
         **kwargs
     ):
         self.min_cluster_size = min_cluster_size
         self.min_samples = min_samples
         self.alpha = alpha
         self.max_cluster_size = max_cluster_size
-        self.max_cluster_eps = max_cluster_eps
+        self.min_prob_limit = min_prob_limit
         self.cluster_selection_epsilon = cluster_selection_epsilon
         self.metric = metric
         self.p = p

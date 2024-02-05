@@ -662,7 +662,7 @@ cpdef tuple get_clusters(np.ndarray tree, dict stability,
                          match_reference_implementation=False,
                          cluster_selection_epsilon=0.0,
                          max_cluster_size=0,
-                         max_cluster_eps=np.inf):
+                         min_prob_limit=np.inf):
     """Given a tree and stability dict, produce the cluster labels
     (and probabilities) for a flat clustering based on the chosen
     cluster selection method.
@@ -696,7 +696,7 @@ cpdef tuple get_clusters(np.ndarray tree, dict stability,
         be overridden by the cluster_selection_epsilon parameter in
         rare cases.
 
-    max_cluster_eps: float, optional (default np.inf)
+    min_prob_lim: float, optional (default np.inf)
         The maximum eps for clusters located by the EOM clusterer.
 
     Returns
@@ -771,9 +771,10 @@ cpdef tuple get_clusters(np.ndarray tree, dict stability,
             # print('labels:', labels)
             min_prob = np.min(np.nonzero(get_probabilities(tree, reverse_cluster_map, labels)))
 
-            # print('subtree_probs:', subtree_probs)
+            if min_prob < min_prob_limit:
+                print(f'Min prob condition triggered for node {node} with min_prob: {min_prob}')
             
-            if subtree_stability > stability[node] or cluster_sizes[node] > max_cluster_size  or min_prob < max_cluster_eps:
+            if subtree_stability > stability[node] or cluster_sizes[node] > max_cluster_size  or min_prob < min_prob_limit:
                 is_cluster[node] = False
                 stability[node] = subtree_stability
             else:
