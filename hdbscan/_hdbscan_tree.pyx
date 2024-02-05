@@ -768,8 +768,9 @@ cpdef tuple get_clusters(np.ndarray tree, dict stability,
                                 allow_single_cluster, cluster_selection_epsilon,
                                 match_reference_implementation)
             # print('node:', node)
-            # print('labels:', labels)
-            min_prob = np.min(np.nonzero(get_probabilities(tree, reverse_cluster_map, labels)))
+            # print('labels:', labels)min_prob < max_cluster_eps
+            cluster_probabilities = get_probabilities(tree, reverse_cluster_map, labels)
+            min_prob = np.min(cluster_probabilities[np.nonzero(cluster_probabilities)])
 
             if min_prob < min_prob_limit:
                 print(f'Min prob condition triggered for node {node} with min_prob: {min_prob}')
